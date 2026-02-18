@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seeing Red</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script>
+      window.SEEING_RED_SHOPIFY = {
+        domain: "seeing-red-2.myshopify.com",
+        storefrontToken: "2f0e7d2530694a0d24b112bfe67531cb",
+      };
+    </script>
+  </head>
+  <body>
+    <button class="cartBtn cartBtn--landing" id="cartBtn" type="button" aria-label="Open cart">
+      <img class="cartBtn__icon" src="./assets/icon/cart.png" alt="" aria-hidden="true" />
+      <span class="cartBtn__count" id="cartCount">0</span>
+    </button>
+
+    <div class="landingLogo" aria-hidden="true">
+      <img class="landingLogo__img" src="./assets/icon/logo.png" alt="" />
+      <div class="landingLogo__label">SHOP</div>
+    </div>
+
+    <main class="page page--landing">
+      <section id="landingView">
+        <section class="grid grid--landing" id="productGrid" aria-label="Product grid"></section>
+
+        <footer class="landingFooter">
+          <img class="landingFooter__mark" src="./assets/icon/arrow.png" alt="" aria-hidden="true" />
+          <div class="landingFooter__label">ARCHIVE</div>
+        </footer>
+      </section>
+
+      <section class="pdpPage" id="pdpPage" hidden>
+        <div class="pdpTop">
+          <button class="overlay__close" id="pdpBack" type="button" aria-label="Back"><img class="overlay__closeIcon" src="./assets/icon/arrow.png" alt="" /><span class="overlay__closeLabel">BACK</span></button>
+          <div class="pdpTop__logo" aria-hidden="true">
+            <img class="pdpTop__logoImg" src="./assets/icon/logo.png" alt="" />
+          </div>
+          <button class="pdpCartBtn" id="pdpCartBtn" type="button" aria-label="Open cart">
+            <img class="pdpCartBtn__icon" src="./assets/icon/cart.png" alt="" aria-hidden="true" />
+            <span class="pdpCartBtn__count" id="pdpCartCount">0</span>
+          </button>
+        </div>
+
+        <div class="swipeCarousel" id="swipeCarousel">
+          <div class="swipeCarousel__clip">
+            <div class="swipeCarousel__track" id="swipeTrack"></div>
+          </div>
+        </div>
+
+        <div class="productView">
+          <div class="gallery">
+            <div class="gallery__main" id="mainImageFrame">
+              <img id="mainImage" alt="" />
+            </div>
+            <div class="gallery__thumbs" id="thumbs"></div>
+          </div>
+
+          <div class="details">
+            <div class="details__top">
+              <div class="details__kicker">NEW IN</div>
+              <div class="details__price" id="productPrice">0</div>
+            </div>
+
+            <div class="details__rule" aria-hidden="true"></div>
+
+            <div class="details__name" id="productName">Product</div>
+            <div class="details__size" id="productSize">SIZE M</div>
+
+            <div class="details__desc" id="productDesc"></div>
+
+            <div class="details__rule" aria-hidden="true"></div>
+
+            <button class="details__more" id="moreInfo" type="button">More Info</button>
+            <button class="details__add" id="addToCart" type="button">ADD TO CART</button>
+
+            <select id="sizeSelect" class="details__select" aria-hidden="true" tabindex="-1">
+              <option value="XS">XS</option>
+              <option value="S">S</option>
+              <option value="M" selected>M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
+            <input id="qtyInput" class="details__qty" type="number" inputmode="numeric" min="1" value="1" aria-hidden="true" tabindex="-1" />
+            <button class="btn" id="buyNow" type="button">Buy now</button>
+          </div>
+        </div>
+
+        <a class="pdpHandle" href="https://www.instagram.com/_seeing_red__/" target="_blank" rel="noopener noreferrer">@_SEEING_RED__</a>
+      </section>
+
+    </main>
+
+    <aside class="cart" id="cart" aria-label="Cart" aria-hidden="true">
+      <div class="cart__header">
+        <div class="cart__title">BASKET — <span id="cartHeaderCount">0</span></div>
+        <button class="cart__close" id="closeCart" type="button" aria-label="Close basket">X</button>
+      </div>
+      <div class="cart__items" id="cartItems"></div>
+      <div class="cart__rule" aria-hidden="true"></div>
+      <div class="cart__note">
+        <div class="cart__noteText">
+          All purchases made from seeingred.com will be shipped within 3–5 business days
+        </div>
+        <button class="cart__learnMore" id="cartLearnMore" type="button">LEARN MORE</button>
+      </div>
+      <div class="cart__footer">
+        <div class="cart__row">
+          <div class="cart__muted">SUBTOTAL</div>
+          <div class="cart__subtotal" id="cartSubtotal">0</div>
+        </div>
+        <button class="cart__checkout" id="checkout" type="button">CHECKOUT</button>
+      </div>
+    </aside>
+
+    <div class="drawerScrim" id="drawerScrim" aria-hidden="true"></div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
