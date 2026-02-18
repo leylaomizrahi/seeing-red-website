@@ -626,7 +626,7 @@ function buildSwipeCarousel(images, track){
     current = idx;
     slides[current].classList.add("isActive");
     const vw = window.innerWidth;
-    const slideW = vw * 0.55;
+    const slideW = slides[current] ? slides[current].getBoundingClientRect().width : (vw * 0.55);
     const offset = (vw / 2) - (slideW * current) - (slideW / 2);
     track.style.transform = `translateX(${offset}px)`;
   }

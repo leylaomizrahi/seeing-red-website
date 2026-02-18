@@ -13,7 +13,7 @@
   --paper: #d7d3cc;
   --logoTop: 8px;
   --logoSize: clamp(170px, 16vw, 230px);
-  --logoSizeMobile: 86px;
+  --logoSizeMobile: 160px;
 }
 
 @font-face{
@@ -293,10 +293,14 @@ body.isPdpOpen .landingLogo{
 }
 
 @media (max-width: 540px){
-  .page--landing{ min-height: 100vh; }
-                                                                                                                                .page--landing #landingView {
-                                                                                                                                  padding-top: 200px;
-                                                                                                                                }
+  .page--landing {
+      min-height: 100vh;
+      padding-top: 50px;
+    }
+  
+    .page--landing #landingView {
+      padding-top: 200px;
+    }
 
   .cartBtn--landing{ top: 18px; right: 16px; }
 
@@ -320,7 +324,7 @@ body.isPdpOpen .landingLogo{
   .grid--landing > .tile .tile__diamond{
     width: 78%;
       height: 78%;
-      border-radius: 27%;
+      border-radius: 23% 27%;
   }
 
   .grid--landing > .tile:nth-child(1){ grid-column: 1 / span 2; grid-row: 1; transform: translateY(0); }
@@ -359,7 +363,7 @@ body.isPdpOpen .landingLogo{
   top: 50%;
   width: 78%;
   height: 78%;
-  border-radius: 27%;
+  border-radius: 23% 27%;
     background: rgba(0, 0, 0, 0.06);
     box-shadow: 0 30px 90px rgba(0, 0, 0, 0.18);
   overflow: hidden;
@@ -698,13 +702,16 @@ body.isPdpOpen .landingLogo{
 }
 
 @media (max-width: 760px){
+  :root {
+      --logoSize: var(--logoSizeMobile);
+    }
   .gallery{ display: none !important; }
 
   .swipeCarousel{
     display: block;
     width: 100vw;
     margin-left: -16px;
-    padding: 10vw 0 6vw;
+    padding: var(--logoSizeMobile) 0 6vw;
     overflow: visible;
     cursor: grab;
   }
@@ -746,7 +753,7 @@ body.isPdpOpen .landingLogo{
   .swipeCarousel__diamond{
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: 27%;
+    border-radius: 23% 27%;
     overflow: hidden;
     background: rgba(0, 0, 0, 0.06);
     --stretch: 1.5;
@@ -782,7 +789,7 @@ body.isPdpOpen .landingLogo{
 .gallery__main{
   width: min(300px, 26vw);
   aspect-ratio: 1 / 1;
-  border-radius: 27%;
+  border-radius: 23% 27%;
   overflow:hidden;
   border: 0;
   background: rgba(0,0,0,0.06);
@@ -856,7 +863,7 @@ body.isPdpOpen .landingLogo{
   flex: 0 0 auto;
   width: 88px;
   aspect-ratio: 1 / 1;
-  border-radius: 28px;
+  border-radius: 23% 27%;
   overflow:hidden;
   border: 0;
   background: rgba(0,0,0,0.05);
@@ -1107,7 +1114,7 @@ body.isPdpOpen .cartBtn:hover{
 .cartItem__diamond{
   width: 96px;
   height: 96px;
-  border-radius: 27%;
+  border-radius: 23% 27%;
   overflow: hidden;
   border: 0;
   background: rgba(0,0,0,0.05);
