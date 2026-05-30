@@ -5,6 +5,7 @@ let PRODUCTS = [
     price: 98,
     desc: "Heavyweight fleece hoodie with a clean fit. Soft inside, structured outside. Built for everyday wear.",
     color: "Crimson",
+    fabric: "100% Organic Heavyweight Cotton Fleece",
   },
   {
     id: "sr-002",
@@ -12,6 +13,8 @@ let PRODUCTS = [
     price: 44,
     desc: "Midweight cotton tee with a slightly boxy silhouette. Easy to layer, easy to live in.",
     color: "Scarlet",
+    stock: 0,
+    fabric: "100% Organic Ring-spun Cotton",
   },
   {
     id: "sr-003",
@@ -19,6 +22,7 @@ let PRODUCTS = [
     price: 124,
     desc: "A classic track jacket with subtle shine and a smooth hand feel. Clean lines, bold tone.",
     color: "Ruby",
+    fabric: "85% Recycled Polyester, 15% Elastane Tricot",
   },
   {
     id: "sr-004",
@@ -26,6 +30,7 @@ let PRODUCTS = [
     price: 118,
     desc: "Relaxed cargo with crisp structure. Utility pockets, tapered finish.",
     color: "Burgundy",
+    fabric: "100% Heavy Cotton Twill",
   },
   {
     id: "sr-005",
@@ -33,6 +38,7 @@ let PRODUCTS = [
     price: 112,
     desc: "Rib-knit sweater with a comfortable drape. Warm without being heavy.",
     color: "Cherry",
+    fabric: "80% Lambswool, 20% Nylon Blend",
   },
   {
     id: "sr-006",
@@ -40,6 +46,8 @@ let PRODUCTS = [
     price: 132,
     desc: "Brushed overshirt made for layering. A clean outer piece for cooler nights.",
     color: "Vermilion",
+    stock: 0,
+    fabric: "100% Brushed Cotton Flannel",
   },
   {
     id: "sr-007",
@@ -47,6 +55,7 @@ let PRODUCTS = [
     price: 28,
     desc: "Simple rib-knit beanie. The finishing touch that pulls the look together.",
     color: "Carmine",
+    fabric: "100% Soft-touch Acrylic",
   },
   {
     id: "sr-008",
@@ -54,6 +63,7 @@ let PRODUCTS = [
     price: 108,
     desc: "Lightweight windbreaker with a matte finish. Packs easily, wears even easier.",
     color: "Rose",
+    fabric: "100% Recycled Ripstop Nylon",
   },
   {
     id: "sr-009",
@@ -61,6 +71,7 @@ let PRODUCTS = [
     price: 86,
     desc: "Minimal skirt with a clean waistband and subtle movement. Dress up or down.",
     color: "Ox-blood",
+    fabric: "95% Cotton, 5% Spandex French Terry",
   },
   {
     id: "sr-010",
@@ -68,6 +79,7 @@ let PRODUCTS = [
     price: 148,
     desc: "Low-profile sneaker with a crisp outsole and bold accent. Made for daily miles.",
     color: "Redline",
+    fabric: "Premium Cotton Canvas, Vulcanised Rubber Sole",
   },
 ];
 
@@ -113,7 +125,6 @@ const CART_KEY = "seeing_red_cart_v1";
 const SHOPIFY_DOMAIN_KEY = "seeing_red_shopify_domain";
 const SHOPIFY_TOKEN_KEY = "seeing_red_shopify_storefront_token";
 const SHOPIFY_API_VERSION = "2024-04";
-const LANDING_TILE_COUNT = 16;
 const PHONE_LANDING_BREAKPOINT = 760;
 
 const els = {
@@ -126,15 +137,19 @@ const els = {
   pdpCartCount: document.getElementById("pdpCartCount"),
 
   mainImage: document.getElementById("mainImage"),
-  thumbs: document.getElementById("thumbs"),
+  galleryPrevBtn: document.getElementById("galleryPrevBtn"),
+  galleryNextBtn: document.getElementById("galleryNextBtn"),
   productName: document.getElementById("productName"),
   productPrice: document.getElementById("productPrice"),
   productSize: document.getElementById("productSize"),
   productDesc: document.getElementById("productDesc"),
+  fabricsDropdown: document.getElementById("fabricsDropdown"),
+  fabricsContent: document.getElementById("fabricsContent"),
   sizeSelect: document.getElementById("sizeSelect"),
   qtyInput: document.getElementById("qtyInput"),
   addToCart: document.getElementById("addToCart"),
   buyNow: document.getElementById("buyNow"),
+  inquireButton: document.getElementById("inquireButton"),
 
   cartBtn: document.getElementById("cartBtn"),
   cart: document.getElementById("cart"),
@@ -145,10 +160,18 @@ const els = {
   cartHeaderCount: document.getElementById("cartHeaderCount"),
   cartCount: document.getElementById("cartCount"),
   checkout: document.getElementById("checkout"),
+
+  zoomView: document.getElementById("zoomView"),
+  zoomImgWrap: document.querySelector(".zoomView__imgWrap"),
+  zoomImage: document.getElementById("zoomImage"),
+  zoomClose: document.getElementById("closeZoom"),
+  zoomPrev: document.getElementById("zoomPrev"),
+  zoomNext: document.getElementById("zoomNext"),
 };
 
 let activeProduct = null;
 let activeImages = [];
+let currentImageIndex = 0;
 let landingScrollY = 0;
 
 function shouldUsePhoneLandingLayout(){
@@ -163,15 +186,15 @@ function applyLandingGridLayout(){
   if (shouldUsePhoneLandingLayout()){
     const w = Math.max(0, window.innerWidth || document.documentElement.clientWidth || 0);
     const gridWidth = Math.max(0, Math.round(els.grid.getBoundingClientRect().width || 0)) || w;
-    const colGap = 18;
-    const tileSize = Math.min(200, Math.max(120, Math.floor((gridWidth - colGap) / 2) - 2));
-    const rowSize = Math.round(tileSize * 1.08);
+    const colGap = 26;
+    const tileSize = Math.min(240, Math.max(144, Math.floor((gridWidth - colGap) / 2) - 2));
+    const rowSize = tileSize;
 
     els.grid.style.setProperty("grid-auto-flow", "row", "important");
     els.grid.style.setProperty("grid-template-columns", "repeat(2, 1fr)", "important");
     els.grid.style.setProperty("grid-auto-rows", `${rowSize}px`, "important");
     els.grid.style.setProperty("column-gap", `${colGap}px`, "important");
-    els.grid.style.setProperty("row-gap", "0px", "important");
+    els.grid.style.setProperty("row-gap", `${colGap}px`, "important");
     els.grid.style.setProperty("justify-items", "center", "important");
 
     for (let idx = 0; idx < tiles.length; idx++){
@@ -251,7 +274,7 @@ function openProductPage(productId){
 }
 
 function money(n){
-  return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(n);
 }
 
 function cartMoney(n){
@@ -259,7 +282,7 @@ function cartMoney(n){
   if (!Number.isFinite(value)) return "0";
 
   const isInt = Math.abs(value - Math.round(value)) < 1e-9;
-  return new Intl.NumberFormat(undefined, {
+  return "£" + new Intl.NumberFormat("en-GB", {
     minimumFractionDigits: isInt ? 0 : 2,
     maximumFractionDigits: isInt ? 0 : 2,
   }).format(value);
@@ -376,6 +399,43 @@ function toNumberAmount(amount){
   return Number.isFinite(n) ? n : 0;
 }
 
+function parseFabric(fabricMetafield) {
+  if (!fabricMetafield) return "";
+  
+  const getNameFromMetaobject = (metaobj) => {
+    if (!metaobj || !Array.isArray(metaobj.fields)) return null;
+    const nameField = metaobj.fields.find(f => f.key === "name" || f.key === "label");
+    if (nameField) return nameField.value;
+    if (metaobj.fields.length > 0) return metaobj.fields[0].value;
+    return metaobj.handle || "";
+  };
+
+  if (fabricMetafield.references && fabricMetafield.references.nodes && fabricMetafield.references.nodes.length > 0) {
+    return fabricMetafield.references.nodes
+      .map(getNameFromMetaobject)
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (fabricMetafield.reference) {
+    return getNameFromMetaobject(fabricMetafield.reference) || "";
+  }
+
+  if (fabricMetafield.value) {
+    try {
+      const parsed = JSON.parse(fabricMetafield.value);
+      if (Array.isArray(parsed)) {
+        return parsed.join(", ");
+      }
+      return String(parsed);
+    } catch {
+      return String(fabricMetafield.value);
+    }
+  }
+
+  return "";
+}
+
 async function fetchAllShopifyProducts({ domain, token }){
   const query = `
     query Products($cursor: String) {
@@ -386,6 +446,7 @@ async function fetchAllShopifyProducts({ domain, token }){
             id
             handle
             title
+            availableForSale
             description
             descriptionHtml
             images(first: 10) {
@@ -399,6 +460,27 @@ async function fetchAllShopifyProducts({ domain, token }){
                 node {
                   id
                   selectedOptions { name value }
+                }
+              }
+            }
+            fabric: metafield(namespace: "shopify", key: "fabric") {
+              value
+              reference {
+                ... on Metaobject {
+                  fields {
+                    key
+                    value
+                  }
+                }
+              }
+              references(first: 10) {
+                nodes {
+                  ... on Metaobject {
+                    fields {
+                      key
+                      value
+                    }
+                  }
                 }
               }
             }
@@ -431,9 +513,11 @@ async function fetchAllShopifyProducts({ domain, token }){
         price: toNumberAmount(node?.priceRange?.minVariantPrice?.amount),
         desc: node.description || "",
         images,
+        availableForSale: node.availableForSale !== false,
         shopifyProductId: node.id,
         shopifyVariantId: variants?.[0]?.id || "",
         shopifyVariants: variants,
+        fabric: parseFabric(node?.fabric),
       });
     }
 
@@ -521,25 +605,41 @@ function buildShopifyLinesFromCart(cart){
 
 function setLandingTilesFromProducts(products){
   const ids = products.map((p) => p.id).filter(Boolean);
-  const tiles = [];
-  const n = Math.max(0, ids.length);
-  for (let i = 0; i < LANDING_TILE_COUNT; i++){
-    tiles.push(ids[i % Math.max(1, n)]);
-  }
-  LANDING_TILES = tiles;
+  LANDING_TILES = ids;
+}
+
+function isOutOfStock(product){
+  if (!product) return false;
+  if (product.stock === 0) return true;
+  if (product.availableForSale === false) return true;
+  return false;
 }
 
 function renderGrid(){
   els.grid.innerHTML = "";
+  
+  // Filter out any out-of-stock products from the main product grid
+  const inStockTiles = LANDING_TILES.filter(productId => {
+    const p = PRODUCTS.find((x) => x.id === productId);
+    return p && !isOutOfStock(p);
+  });
+  
+  els.grid.dataset.count = inStockTiles.length;
 
-  for (const productId of LANDING_TILES){
+  for (const productId of inStockTiles){
     const p = PRODUCTS.find((x) => x.id === productId);
     if (!p) continue;
+    
+    const outOfStock = isOutOfStock(p);
+    
     const btn = document.createElement("button");
     btn.className = "tile";
     btn.type = "button";
     btn.dataset.productId = p.id;
     btn.setAttribute("aria-label", `Open ${p.name}`);
+    if (outOfStock) {
+      btn.classList.add("is-out-of-stock");
+    }
 
     const diamond = document.createElement("div");
     diamond.className = "tile__diamond";
@@ -571,7 +671,12 @@ function renderGrid(){
 
     const name = document.createElement("div");
     name.className = "tile__name";
-    name.textContent = p.name;
+    if (outOfStock) {
+      name.textContent = "OUT OF STOCK";
+      name.classList.add("tile__name--outOfStock");
+    } else {
+      name.textContent = p.name;
+    }
 
     label.appendChild(name);
 
@@ -597,14 +702,9 @@ function renderGrid(){
 
 function buildSwipeCarousel(images, track){
   track.innerHTML = "";
-  let current = 0;
-  let startX = 0;
-  let isDragging = false;
-  let dragMoved = false;
-
-  const slides = images.map((url, idx) => {
+  images.forEach((url) => {
     const slide = document.createElement("div");
-    slide.className = "swipeCarousel__slide" + (idx === 0 ? " isActive" : "");
+    slide.className = "swipeCarousel__slide";
 
     const diamond = document.createElement("div");
     diamond.className = "swipeCarousel__diamond";
@@ -617,82 +717,10 @@ function buildSwipeCarousel(images, track){
     diamond.appendChild(img);
     slide.appendChild(diamond);
     track.appendChild(slide);
-    return slide;
   });
-
-  function goTo(idx){
-    idx = Math.max(0, Math.min(images.length - 1, idx));
-    slides[current].classList.remove("isActive");
-    current = idx;
-    slides[current].classList.add("isActive");
-    const vw = window.innerWidth;
-    const slideW = slides[current] ? slides[current].getBoundingClientRect().width : (vw * 0.55);
-    const offset = (vw / 2) - (slideW * current) - (slideW / 2);
-    track.style.transform = `translateX(${offset}px)`;
-  }
-
-  requestAnimationFrame(() => goTo(0));
-
-  let resizeTimer;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => goTo(current), 100);
-  });
-
-  let isTouchActive = false;
-
-  track.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-    isDragging = true;
-    dragMoved = false;
-    isTouchActive = true;
-  }, { passive: true });
-
-  track.addEventListener("touchmove", (e) => {
-    if (!isDragging) return;
-    if (Math.abs(e.touches[0].clientX - startX) > 8) dragMoved = true;
-  }, { passive: true });
-
-  track.addEventListener("touchend", (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    isTouchActive = false;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) > 40){
-      goTo(dx < 0 ? current + 1 : current - 1);
-    } else if (!dragMoved){
-      const tapX = e.changedTouches[0].clientX;
-      goTo(tapX > window.innerWidth / 2 ? current + 1 : current - 1);
-    } else {
-      goTo(current);
-    }
-  });
-
-  track.addEventListener("mousedown", (e) => {
-    if (isTouchActive) return;
-    startX = e.clientX;
-    isDragging = true;
-    dragMoved = false;
-    e.preventDefault();
-  });
-
-  window.addEventListener("mousemove", (e) => {
-    if (!isDragging || isTouchActive) return;
-    if (Math.abs(e.clientX - startX) > 8) dragMoved = true;
-  });
-
-  window.addEventListener("mouseup", (e) => {
-    if (!isDragging || isTouchActive) return;
-    isDragging = false;
-    const dx = e.clientX - startX;
-    if (Math.abs(dx) > 40){
-      goTo(dx < 0 ? current + 1 : current - 1);
-    } else if (!dragMoved){
-      goTo(e.clientX > window.innerWidth / 2 ? current + 1 : current - 1);
-    } else {
-      goTo(current);
-    }
-  });
+  
+  const clip = track.parentElement;
+  if (clip) clip.scrollLeft = 0;
 }
 
 function hydrateProductView(productId){
@@ -702,41 +730,74 @@ function hydrateProductView(productId){
   activeProduct = p;
   activeImages = productImages(p);
 
+  const outOfStock = isOutOfStock(p);
+
   els.productName.textContent = p.name;
-  els.productPrice.textContent = money(p.price);
-  els.productDesc.textContent = p.desc;
+  if (els.productPrice) {
+    if (outOfStock) {
+      els.productPrice.style.display = "none";
+    } else {
+      els.productPrice.style.display = "";
+      els.productPrice.textContent = money(p.price);
+    }
+  }
+  els.productDesc.textContent = ""; // Avoid duplication
 
   if (els.productSize){
-    const size = els.sizeSelect?.value || "M";
-    els.productSize.textContent = `SIZE ${size}`;
+    const formatted = (p.desc || "")
+      .replace(/([•\-\*])/g, "\n$1")
+      .replace(/\n\n+/g, "\n\n")
+      .trim();
+    els.productSize.textContent = formatted;
+  }
+
+  if (els.fabricsDropdown && els.fabricsContent) {
+    if (p.fabric) {
+      els.fabricsContent.textContent = p.fabric;
+      els.fabricsDropdown.style.display = "";
+      els.fabricsDropdown.open = false; // Reset to closed state by default
+    } else {
+      els.fabricsDropdown.style.display = "none";
+    }
   }
 
   els.mainImage.src = activeImages[0];
   els.mainImage.alt = p.name;
 
-  els.thumbs.innerHTML = "";
-  activeImages.forEach((url, idx) => {
-    const t = document.createElement("button");
-    t.type = "button";
-    t.className = "thumb";
-    t.setAttribute("aria-label", `View image ${idx + 1}`);
-
-    const img = document.createElement("img");
-    img.src = url;
-    img.alt = "";
-
-    t.appendChild(img);
-    t.addEventListener("click", () => {
-      els.mainImage.src = url;
-    });
-
-    els.thumbs.appendChild(t);
-  });
+  currentImageIndex = 0;
 
   const swipeTrack = document.getElementById("swipeTrack");
   if (swipeTrack) buildSwipeCarousel(activeImages, swipeTrack);
 
   els.qtyInput.value = "1";
+
+  if (els.addToCart) {
+    els.addToCart.style.display = outOfStock ? "none" : "";
+  }
+  if (els.buyNow) {
+    els.buyNow.style.display = outOfStock ? "none" : "";
+  }
+  if (els.inquireButton) {
+    els.inquireButton.style.display = outOfStock ? "" : "none";
+  }
+}
+
+function setZoomOpen(open){
+  if (!els.zoomView) return;
+  els.zoomView.hidden = !open;
+  if (open) {
+    updateZoomImage();
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+}
+
+function updateZoomImage(){
+  if (!els.zoomImage || !activeImages || activeImages.length === 0) return;
+  els.zoomImage.src = activeImages[currentImageIndex];
+  els.zoomImage.style.transform = "scale(1)";
+  els.zoomImage.style.transformOrigin = "center";
 }
 
 function loadCart(){
@@ -766,22 +827,21 @@ function addItemToCart({ product, size, qty }){
   const cart = loadCart();
   const key = `${product.id}::${size}`;
 
+  // Each product is one-of-one — skip if already in cart
   const existing = cart.find((x) => x.key === key);
-  if (existing){
-    existing.qty += qty;
-  } else {
-    const merchandiseId = findShopifyVariantIdForSize(product, size);
-    cart.push({
-      key,
-      productId: product.id,
-      name: product.name,
-      size,
-      price: product.price,
-      qty,
-      image: productImages(product)[0],
-      shopifyVariantId: merchandiseId,
-    });
-  }
+  if (existing) return;
+
+  const merchandiseId = findShopifyVariantIdForSize(product, size);
+  cart.push({
+    key,
+    productId: product.id,
+    name: product.name,
+    size,
+    price: product.price,
+    qty: 1,
+    image: productImages(product)[0],
+    shopifyVariantId: merchandiseId,
+  });
 
   saveCart(cart);
   renderCart();
@@ -794,12 +854,14 @@ function setCartOpen(open){
     els.cart.setAttribute("aria-hidden", "false");
     els.drawerScrim.setAttribute("aria-hidden", "false");
     els.cartBtn.style.display = "none";
+    document.body.style.overflow = "hidden";
   } else {
     els.cart.classList.remove("isOpen");
     els.drawerScrim.classList.remove("isOpen");
     els.cart.setAttribute("aria-hidden", "true");
     els.drawerScrim.setAttribute("aria-hidden", "true");
     els.cartBtn.style.display = "";
+    document.body.style.overflow = "";
   }
 }
 
@@ -899,38 +961,12 @@ function renderCart(){
     const bottom = document.createElement("div");
     bottom.className = "cartItem__bottom";
 
-    const qtyControls = document.createElement("div");
-    qtyControls.className = "cartQty";
-
-    const minus = document.createElement("button");
-    minus.className = "cartQty__btn";
-    minus.type = "button";
-    minus.textContent = "−";
-    minus.setAttribute("aria-label", "Decrease quantity");
-    minus.addEventListener("click", () => updateCartItem(item.key, -1));
-
-    const qty = document.createElement("div");
-    qty.className = "cartQty__value";
-    qty.textContent = String(item.qty);
-
-    const plus = document.createElement("button");
-    plus.className = "cartQty__btn";
-    plus.type = "button";
-    plus.textContent = "+";
-    plus.setAttribute("aria-label", "Increase quantity");
-    plus.addEventListener("click", () => updateCartItem(item.key, +1));
-
-    qtyControls.appendChild(minus);
-    qtyControls.appendChild(qty);
-    qtyControls.appendChild(plus);
-
     const del = document.createElement("button");
     del.className = "cartItem__delete";
     del.type = "button";
     del.textContent = "Delete";
     del.addEventListener("click", () => removeCartItem(item.key));
 
-    bottom.appendChild(qtyControls);
     bottom.appendChild(del);
 
     body.appendChild(name);
@@ -951,19 +987,155 @@ function wireEvents(){
     });
   }
 
+  if (els.galleryPrevBtn) {
+    els.galleryPrevBtn.addEventListener("click", () => {
+      if (!activeImages || activeImages.length === 0) return;
+      currentImageIndex = (currentImageIndex - 1 + activeImages.length) % activeImages.length;
+      els.mainImage.src = activeImages[currentImageIndex];
+    });
+  }
+
+  if (els.galleryNextBtn) {
+    els.galleryNextBtn.addEventListener("click", () => {
+      if (!activeImages || activeImages.length === 0) return;
+      currentImageIndex = (currentImageIndex + 1) % activeImages.length;
+      els.mainImage.src = activeImages[currentImageIndex];
+    });
+  }
+
+  if (els.mainImage){
+    els.mainImage.style.cursor = "zoom-in";
+    els.mainImage.addEventListener("click", () => setZoomOpen(true));
+
+    // Touch swipe left/right to navigate images on mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    els.mainImage.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    els.mainImage.addEventListener("touchend", (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchStartX - touchEndX; // positive if swiped left
+      const diffY = touchStartY - touchEndY;
+
+      // Detect swipe left (next image) or right (prev image)
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0) {
+          if (els.galleryNextBtn) els.galleryNextBtn.click();
+        } else {
+          if (els.galleryPrevBtn) els.galleryPrevBtn.click();
+        }
+      }
+    }, { passive: true });
+  }
+
+  // Keyboard Arrow Left/Right to navigate product images
+  document.addEventListener("keydown", (e) => {
+    // 1. If Zoom View is open and visible
+    if (els.zoomView && !els.zoomView.hidden) {
+      if (e.key === "ArrowLeft") {
+        if (els.zoomPrev) els.zoomPrev.click();
+      } else if (e.key === "ArrowRight") {
+        if (els.zoomNext) els.zoomNext.click();
+      }
+      return; // Skip normal PDP arrows if we are zoomed in
+    }
+
+    // 2. If Product Detail Page (PDP) is open and visible
+    if (els.pdpPage && !els.pdpPage.hidden) {
+      // Don't intercept if user is typing in form fields
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.tagName === "SELECT")) {
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        if (els.galleryPrevBtn) els.galleryPrevBtn.click();
+      } else if (e.key === "ArrowRight") {
+        if (els.galleryNextBtn) els.galleryNextBtn.click();
+      }
+    }
+  });
+
+  if (els.zoomClose) els.zoomClose.addEventListener("click", () => setZoomOpen(false));
+  if (els.zoomView) els.zoomView.addEventListener("click", (e) => {
+    if (e.target === els.zoomView) setZoomOpen(false);
+  });
+
+  if (els.zoomPrev){
+    els.zoomPrev.addEventListener("click", () => {
+      if (!activeImages || activeImages.length === 0) return;
+      currentImageIndex = (currentImageIndex - 1 + activeImages.length) % activeImages.length;
+      els.mainImage.src = activeImages[currentImageIndex];
+      updateZoomImage();
+    });
+  }
+
+  if (els.zoomNext){
+    els.zoomNext.addEventListener("click", () => {
+      if (!activeImages || activeImages.length === 0) return;
+      currentImageIndex = (currentImageIndex + 1) % activeImages.length;
+      els.mainImage.src = activeImages[currentImageIndex];
+      updateZoomImage();
+    });
+  }
+
+  // Touch swipe left/right to navigate images inside full-screen Zoom View modal
+  if (els.zoomView) {
+    let zoomTouchStartX = 0;
+    let zoomTouchStartY = 0;
+
+    els.zoomView.addEventListener("touchstart", (e) => {
+      zoomTouchStartX = e.touches[0].clientX;
+      zoomTouchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    els.zoomView.addEventListener("touchend", (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = zoomTouchStartX - touchEndX; // positive if swiped left
+      const diffY = zoomTouchStartY - touchEndY;
+
+      // Detect swipe left (next image) or right (prev image)
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0) {
+          if (els.zoomNext) els.zoomNext.click();
+        } else {
+          if (els.zoomPrev) els.zoomPrev.click();
+        }
+      }
+    }, { passive: true });
+  }
+
+  if (els.zoomImgWrap && els.zoomImage) {
+    els.zoomImgWrap.addEventListener("mousemove", (e) => {
+      const rect = els.zoomImgWrap.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      els.zoomImage.style.transformOrigin = `${x}% ${y}%`;
+      els.zoomImage.style.transform = "scale(2)";
+    });
+
+    els.zoomImgWrap.addEventListener("mouseleave", () => {
+      els.zoomImage.style.transform = "scale(1)";
+      els.zoomImage.style.transformOrigin = "center";
+    });
+  }
+
   if (els.pdpCartBtn){
     els.pdpCartBtn.addEventListener("click", () => setCartOpen(true));
   }
 
-  if (els.sizeSelect && els.productSize){
-    els.sizeSelect.addEventListener("change", () => {
-      els.productSize.textContent = `SIZE ${els.sizeSelect.value}`;
-    });
-  }
+  /* Size text is now the Shopify description, no longer updated by selector */
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape"){
-      if (els.cart.classList.contains("isOpen")) setCartOpen(false);
+      if (els.zoomView && !els.zoomView.hidden) setZoomOpen(false);
+      else if (els.cart.classList.contains("isOpen")) setCartOpen(false);
       else if (!els.pdpPage?.hidden) window.location.hash = "";
     }
   });
@@ -972,11 +1144,21 @@ function wireEvents(){
     if (!activeProduct) return;
 
     const size = els.sizeSelect.value;
-    const qty = clampInt(els.qtyInput.value, 1);
 
-    addItemToCart({ product: activeProduct, size, qty });
+    addItemToCart({ product: activeProduct, size, qty: 1 });
     setCartOpen(true);
   });
+
+  if (els.inquireButton) {
+    els.inquireButton.addEventListener("click", () => {
+      if (!activeProduct) return;
+      const email = "seeingred.clobber@gmail.com";
+      const subject = `Inquiry: ${activeProduct.name}`;
+      const body = `Hi Seeing Red,\n\nI am inquiring about the "${activeProduct.name}" (${activeProduct.id}) which is currently out of stock.\n\nProduct Details:\n- Name: ${activeProduct.name}\n- Color: ${activeProduct.color || "Red"}\n\nPlease let me know when this item is back in stock!\n\nBest regards,`;
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(gmailUrl, "_blank");
+    });
+  }
 
   els.buyNow.addEventListener("click", async () => {
     if (!activeProduct) return;
@@ -1033,6 +1215,7 @@ function wireEvents(){
   window.addEventListener("resize", () => {
     applyLandingGridLayout();
   });
+
 }
 
 function init(){
@@ -1058,3 +1241,75 @@ function init(){
 }
 
 init();
+
+// Splash Screen Logic
+const splashScreen = document.getElementById('splashScreen');
+const enterSiteBtn = document.getElementById('enterSiteBtn');
+
+const splashVideo = splashScreen ? splashScreen.querySelector('.splashScreen__video') : null;
+
+// Skip splash screen/video if the user has already entered the site in this session
+if (sessionStorage.getItem('hasEnteredSite') === 'true') {
+  if (splashScreen) {
+    splashScreen.classList.add('is-hidden');
+    if (splashVideo) splashVideo.pause();
+  }
+} else {
+  document.body.style.overflow = 'hidden';
+}
+
+if (splashScreen && enterSiteBtn) {
+  enterSiteBtn.addEventListener('click', () => {
+    splashScreen.classList.add('is-hidden');
+    if (splashVideo) splashVideo.pause();
+    sessionStorage.setItem('hasEnteredSite', 'true');
+    window.location.hash = "";
+    document.body.style.overflow = ''; // Restore scroll
+    window.scrollTo({ top: 0, behavior: "auto" }); // Reset scroll to top
+    // Double safeguard with requestAnimationFrame to override any delayed swipe inertia
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    });
+    if (typeof hidePdp === 'function') {
+      hidePdp();
+    }
+  });
+
+  // Swipe up on mobile or scroll down on desktop to enter landing page
+  let touchStartY = 0;
+  let touchStartX = 0;
+
+  splashScreen.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  splashScreen.addEventListener('touchend', (e) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffY = touchStartY - touchEndY; // positive if swiped up
+    const diffX = touchStartX - touchEndX;
+
+    // Detect swipe up (vertical movement up is > 40px and greater than horizontal movement)
+    if (diffY > 40 && Math.abs(diffY) > Math.abs(diffX)) {
+      enterSiteBtn.click();
+    }
+  }, { passive: true });
+
+  splashScreen.addEventListener('wheel', (e) => {
+    if (e.deltaY > 0) {
+      enterSiteBtn.click();
+    }
+  }, { passive: true });
+}
+
+const logos = document.querySelectorAll('.landingLogo, .pdpTop__logo');
+logos.forEach(logo => {
+  logo.addEventListener('click', () => {
+    if (splashScreen) {
+      splashScreen.classList.remove('is-hidden');
+      if (splashVideo) splashVideo.play();
+      document.body.style.overflow = 'hidden'; // Lock scroll again when splash is active
+    }
+  });
+});
