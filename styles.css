@@ -595,13 +595,15 @@ body.isPdpOpen .landingLogo{
 
 .tile__img{
   position:absolute;
-  inset: 0;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
   z-index: 1;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   transform-origin: center;
-  transform: scale(2.0);
   border-radius: inherit;
   filter: contrast(1.03) saturate(1.05) drop-shadow(0 30px 90px rgba(0,0,0,0.18));
 }
@@ -1254,7 +1256,7 @@ body.isPdpOpen .cartBtn:hover{
   right: 0;
   width: min(420px, 92vw);
   height: 100vh;
-  z-index: 60;
+  z-index: 80;
   background-color: #F5F5F3;
   background-image: none;
   border-left: 1px solid rgba(0,0,0,0.24);
@@ -1269,7 +1271,7 @@ body.isPdpOpen .cartBtn:hover{
 .drawerScrim{
   position: fixed;
   inset:0;
-  z-index: 55;
+  z-index: 75;
   background: rgba(0,0,0,0.6);
   opacity: 0;
   pointer-events: none;
@@ -1703,5 +1705,15 @@ body.isPdpOpen .cartBtn:hover{
   .cart__footer {
     /* Prevent bottom dynamic browser bar/safe area cut-off */
     padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Phone-only PDP gallery image sizing overrides (placed at the bottom to override tablet styles) */
+@media (max-width: 540px) {
+  .gallery {
+    max-width: 96vw !important;
+  }
+  .gallery__main {
+    max-width: 94vw !important;
   }
 }
